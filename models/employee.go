@@ -1,9 +1,8 @@
 package models
 
 type Employee struct {
-	id       int
-	name     string
-	address  string
-	email    string
-	password string
+	Id          int    `json:"id"`
+	Name        string `json:"name"`
+	Address     string `json:"address"`
+	Location_id int    `json:"location_id"`
 }
