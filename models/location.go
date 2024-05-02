@@ -1,7 +1,7 @@
 package models
 
 type Location struct {
-	id      int
-	name    string
-	address string
+	Id      int    `json:"id"`
+	Name    string `json:"name"`
+	Address string `json:"address"`
 }

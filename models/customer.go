@@ -1,9 +1,9 @@
 package models
 
 type Customer struct {
-	id       int
-	name     string
-	address  string
-	email    string
-	password string
+	Id       int    `json:"id"`
+	Name     string `json:"name"`
+	Address  string `json:"address"`
+	Email    string `json:"email"`
+	Password string `json:"password"`
 }
