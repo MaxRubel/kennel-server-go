@@ -3,6 +3,8 @@ package views
 import (
 	"database/sql"
 	"encoding/json"
+	"errors"
+	"fmt"
 
 	"github.com/MaxRubel/kennel-server-go/models"
 	_ "github.com/mattn/go-sqlite3"
@@ -26,7 +28,7 @@ func GetAllAnimals() ([]byte, error) {
 
 	for rows.Next() {
 		var animal models.Animal
-		err := rows.Scan(&animal.Id, &animal.Name, &animal.Breed, &animal.Status, &animal.LocationID, &animal.CustomerID)
+		err := rows.Scan(&animal.Id, &animal.Name, &animal.Status, &animal.Breed, &animal.LocationID, &animal.CustomerID)
 		if err != nil {
 			panic(err)
 		}
@@ -56,7 +58,7 @@ func GetSingleAnimal(id int) ([]byte, error) {
 
 	defer db.Close()
 	err = db.QueryRow("SELECT * FROM Animal WHERE Id = ?", id).
-		Scan(&animal.Id, &animal.Name, &animal.Breed, &animal.Status, &animal.LocationID, &animal.CustomerID)
+		Scan(&animal.Id, &animal.Name, &animal.Status, &animal.Breed, &animal.LocationID, &animal.CustomerID)
 
 	if err != nil {
 		panic(err)
@@ -67,4 +69,28 @@ func GetSingleAnimal(id int) ([]byte, error) {
 		panic(err)
 	}
 	return animalJson, nil
+}
+
+func CreateNewAnimal(newAnimal models.Animal) error {
+	db, err := sql.Open("sqlite3", "./db.sqlite3")
+
+	if err != nil {
+		panic(err)
+	}
+
+	defer db.Close()
+
+	query := `
+	INSERT INTO Animal
+		(name, breed, status, location_id, customer_id)
+	VALUES
+		($1, $2, $3, $4, $5)
+`
+	_, err = db.Exec(query, newAnimal.Name, newAnimal.Status, newAnimal.Breed, newAnimal.LocationID, newAnimal.CustomerID)
+	if err != nil {
+		return errors.New("error inserting new animal into DB")
+	} else {
+		fmt.Print("Animal sucessfully created")
+		return nil
+	}
 }
