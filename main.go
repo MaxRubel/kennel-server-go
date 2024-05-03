@@ -6,26 +6,31 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/MaxRubel/kennel-server-go/handle"
 	"github.com/MaxRubel/kennel-server-go/models"
 	"github.com/MaxRubel/kennel-server-go/views"
 	"github.com/gorilla/mux"
 )
+
+func writeCORS(w http.ResponseWriter){
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Add("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+	w.Header().Add("Access-Control-Allow-Headers", "Content-Type")
+}
 
 func main() {
 	r := mux.NewRouter()
 
 	// ANIMAL REQUESTS
 	r.HandleFunc("/animals", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "*")
-		w.Header().Add("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
-		w.Header().Add("Access-Control-Allow-Headers", "Content-Type")
+	
+		writeCORS(w)
 
 		if r.Method == "GET" {
 			animalsJson, err := views.GetAllAnimals()
 			if err != nil {
 				panic(err)
 			}
-			// w.Header().Set("Content-Type", "application/json")
 			w.Write(animalsJson)
 		}
 		if r.Method == "POST" {
@@ -64,6 +69,7 @@ func main() {
 
 	//LOCATION REQUESTS
 	r.HandleFunc("/locations", func(w http.ResponseWriter, r *http.Request) {
+		writeCORS(w)
 		if r.Method == "GET" {
 			locationsJson, err := views.GetAllLocations()
 			if err != nil {
@@ -153,6 +159,7 @@ func main() {
 	})
 
 	views.TestRequest()
+	handle.TestErrorDb()
 	fmt.Println("Server is running on http://localhost:8080")
 	http.ListenAndServe(":8080", r)
 }
