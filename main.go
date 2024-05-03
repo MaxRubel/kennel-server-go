@@ -1,32 +1,46 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"strconv"
 
+	"github.com/MaxRubel/kennel-server-go/models"
 	"github.com/MaxRubel/kennel-server-go/views"
 	"github.com/gorilla/mux"
 )
-
-func wildTest(w http.ResponseWriter, r *http.Request) {
-	path := r.URL.Path
-	fmt.Println("Received request for:", path)
-	fmt.Fprintf(w, "Hello, you requested: %s\n", path)
-}
 
 func main() {
 	r := mux.NewRouter()
 
 	// ANIMAL REQUESTS
 	r.HandleFunc("/animals", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Add("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+		w.Header().Add("Access-Control-Allow-Headers", "Content-Type")
+
 		if r.Method == "GET" {
 			animalsJson, err := views.GetAllAnimals()
 			if err != nil {
 				panic(err)
 			}
-			w.Header().Set("Content-Type", "application/json")
+			// w.Header().Set("Content-Type", "application/json")
 			w.Write(animalsJson)
+		}
+		if r.Method == "POST" {
+			var data models.Animal
+			err := json.NewDecoder(r.Body).Decode(&data)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusBadRequest)
+				return
+			}
+			err = views.CreateNewAnimal(data)
+			if err != nil {
+				fmt.Print("Error creating new animal at the DB")
+				return
+			}
+			w.WriteHeader(http.StatusCreated)
 		}
 	})
 
@@ -139,7 +153,6 @@ func main() {
 	})
 
 	views.TestRequest()
-	r.HandleFunc("/", wildTest)
 	fmt.Println("Server is running on http://localhost:8080")
 	http.ListenAndServe(":8080", r)
 }
